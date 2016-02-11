@@ -1,5 +1,4 @@
-;;; ------------------ PROBLEM SET 8 -------------------------------
-;;; NUMBER 1
+;;; TETRIS GAME
 
 ; Number -> [List-of Number]
 ; Creates list starting from 0 to Number - 1.
