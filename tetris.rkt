@@ -1,3 +1,172 @@
+;;; ------------------ PROBLEM SET 8 -------------------------------
+;;; NUMBER 1
+
+; Number -> [List-of Number]
+; Creates list starting from 0 to Number - 1.
+(define (list-to-n-1 n)
+  (build-list n (λ (x) (+ x 0))))
+
+(check-expect (list-to-n-1 5) (list 0 1 2 3 4))
+(check-expect (list-to-n-1 10) (list 0 1 2 3 4 5 6 7 8 9))
+
+; Number -> [List-of Number]
+; Creates list starting from 1 to Number.
+(define (list-to-n n)
+  (build-list n add1))
+
+(check-expect (list-to-n 5) (list 1 2 3 4 5))
+(check-expect (list-to-n 10) (list 1 2 3 4 5 6 7 8 9 10))
+
+; Number -> [List-of Number]
+; Creates list of fractions divided by a increasing square of 10.
+(define (list-of-fractions n)
+  (build-list n (λ (x) (/ 1 (expt 10 x)))))
+
+(check-expect (list-of-fractions 3) (list 1 .1 .01))
+(check-expect (list-of-fractions 5) (list 1 .1 .01 .001 .0001))
+
+; Number -> [List-of Number]
+; Creates the list of the first n even numbers.
+(define (list-of-evens n)
+  (build-list n (λ (x) (* 2 x))))
+
+(check-expect (list-of-evens 0) empty)
+(check-expect (list-of-evens 1) (list 0))
+(check-expect (list-of-evens 5) (list 0 2 4 6 8))
+
+; Number -> [List-of [List-of Number]]
+; Creates a list of lists of 0 and 1 in a diagonal arrangement.
+(define (diagonal n)
+  (build-list n (λ (x)
+                  (build-list n (λ (y)
+                                  (if (= x y) 1 0))))))
+
+(check-expect (diagonal 0) empty)
+(check-expect (diagonal 1) (list (list 1)))
+(check-expect (diagonal 5)
+              (list
+               (list 1 0 0 0 0)
+               (list 0 1 0 0 0)
+               (list 0 0 1 0 0)
+               (list 0 0 0 1 0)
+               (list 0 0 0 0 1)))
+
+; Number [Number -> Number] -> [List-of Number]
+; Applies function to list of numbers and tabulates results in a list.
+(define (tabulate n f)
+  (build-list (add1 n) (λ (x) (f (- n x)))))
+
+(check-expect (tabulate 1 sqr) (list 1 0))
+(check-expect (tabulate 2 sqr) (list 4 1 0))
+(check-expect (tabulate 2 add1) (list 3 2 1))
+
+;;; --------------------------- NUMBER 2 -----------------------------------
+
+(require 2htdp/image)
+
+; Number -> Boolean
+; Decides whether it is less than 10.
+(λ (x) (< x 10))
+
+; Number Number -> String
+; Multiplies numbers and turns result into a string.
+(λ (x y) (number->string (* x y)))
+
+; An IR is a (make-ir String Number)
+(define-struct ir [name price])
+
+; IR IR -> Boolean
+; Compares inventory records by price.
+; Returns true if first price is more expensive than the second.
+; False if it is less expensive.
+(λ (x y) (cond [(> (ir-price x) (ir-price y)) true]
+               [else false]))
+
+; Number -> Number
+; Produces 0 if Number is even, produces 1 if Number is odd.
+(λ (x) (if (even? x) 0 1))
+
+; Posn Image -> Image
+; Adds a red dot to Image at Posn.
+(λ (x y) (place-image (circle 3 'solid 'red)
+                      (posn-x x) (posn-y x) y))
+
+;;; ------------------------------------- NUMBER 3 ----------------------------------------------
+
+(require 2htdp/image)
+
+; append-from-foldr : [List-of X] [List-of X] -> [List-of X]
+; Appends two lists using foldr function.
+(define (append-from-foldr l1 l2)
+  (foldr (λ (x r) (cons x r)) l2 l1))
+
+(check-expect (append-from-foldr (list 10 20 30) (list 1 2 3))
+              (list 10 20 30 1 2 3))
+(check-expect (append-from-foldr (list 1 2 3) (list 10 20 30))
+              (list 1 2 3 10 20 30))
+
+; append-from-foldl : [List-of X] [List-of X] -> [List-of X]
+; Appends two lists using foldl function.
+(define (append-from-foldl l1 l2)
+  (foldl (λ (x r) (cons x r)) l2 l1))
+
+(check-expect (append-from-foldl (list 10 20 30) (list 1 2 3))
+              (list 30 20 10 1 2 3))
+(check-expect (append-from-foldl (list 1 2 3) (list 10 20 30))
+              (list 3 2 1 10 20 30))
+
+; sum-of-numbers : [List-of Number] -> Number
+; Computes sum of list of numbers.
+(define (sum-of-numbers l)
+  (foldr + 0 l))
+
+(check-expect (sum-of-numbers (list 1 2 3 4)) 10)
+(check-expect (sum-of-numbers (list 10 20 30)) 60)
+
+; product-of-numbers : [List-of Number] -> Number
+; Computes product of list of numbers.
+(define (product-of-numbers l)
+  (foldr * 1 l))
+
+(check-expect (product-of-numbers (list 1 2 3 4)) 24)
+(check-expect (product-of-numbers (list 10 20 30)) 6000)
+
+; compose-images : [List-of Image] -> Image
+; Horizontally composes a list of images.
+(define (compose-images.v1 l)
+  (foldr (λ (x r) (beside x r)) empty-image l))
+
+(check-expect (compose-images.v1 (list (circle 10 "solid" "red")
+                                       (rectangle 10 20 "solid" "green")
+                                       (triangle 10 "solid" "blue")))
+              (beside (circle 10 "solid" "red")
+                      (rectangle 10 20 "solid" "green")
+                      (triangle 10 "solid" "blue")))
+
+; compose-images : [List-of Image] -> Image
+; Using foldl to do same thing.
+(define (compose-images.v2 l)
+  (foldl (λ (x r) (beside r x)) empty-image l))
+
+(check-expect (compose-images.v2 (list (circle 10 "solid" "red")
+                                       (rectangle 10 20 "solid" "green")
+                                       (triangle 10 "solid" "blue")))
+              (beside (circle 10 "solid" "red")
+                      (rectangle 10 20 "solid" "green")
+                      (triangle 10 "solid" "blue")))
+
+; vertical-images : [List-of Image] -> Image
+; Vertically stacks images.
+(define (vertical-images l)
+  (foldr (λ (x r) (above x r)) empty-image l))
+
+(check-expect (vertical-images (list (circle 10 "solid" "red")
+                                     (rectangle 10 20 "solid" "green")
+                                     (triangle 10 "solid" "blue")))
+              (above (circle 10 "solid" "red")
+                     (rectangle 10 20 "solid" "green")
+                     (triangle 10 "solid" "blue")))
+
 ;;; -------------------------------------- TETRIS GAME -------------------------------------------------
 
 (require 2htdp/image)
